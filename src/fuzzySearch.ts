@@ -1,63 +1,121 @@
 /**
- * Calculate Levenshtein distance between two strings.
+ * Calculate Levenshtein distance using an optimized approach.
  */
-export const calculateLevenshteinDistance = (a: string, b: string): number => {
-  const m = a.length;
-  const n = b.length;
+export const optimizedLevenshtein = (a: string, b: string): number => {
+  let prev = Array(b.length + 1).fill(0);
+  let curr = Array(b.length + 1).fill(0);
 
-  if (m === 0) return n;
-  if (n === 0) return m;
+  for (let j = 0; j <= b.length; j++) prev[j] = j;
 
-  const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
-
-  // Initialize base cases
-  for (let i = 0; i <= m; i++) dp[i][0] = i;
-  for (let j = 0; j <= n; j++) dp[0][j] = j;
-
-  // Fill DP table
-  for (let i = 1; i <= m; i++) {
-    for (let j = 1; j <= n; j++) {
-      if (a[i - 1] === b[j - 1]) {
-        dp[i][j] = dp[i - 1][j - 1]; // Characters match
-      } else {
-        dp[i][j] = Math.min(
-          dp[i - 1][j],    // Deletion
-          dp[i][j - 1],    // Insertion
-          dp[i - 1][j - 1] // Substitution
-        ) + 1;
-      }
+  for (let i = 1; i <= a.length; i++) {
+    curr[0] = i;
+    for (let j = 1; j <= b.length; j++) {
+      curr[j] = a[i - 1] === b[j - 1]
+        ? prev[j - 1]
+        : Math.min(prev[j], curr[j - 1], prev[j - 1]) + 1;
     }
+    [prev, curr] = [curr, prev];
   }
 
-  return dp[m][n];
+  return prev[b.length];
 };
 
-
 /**
- * Perform fuzzy search on a dataset.
+ * Perform fuzzy search with additional options.
  */
-export const fuzzySearch = (query: string, data: string[], threshold: number = 2): string[] => {
-  if (!query || !data.length) return []; // Handle empty query or dataset
+export type SearchOptions = {
+  caseSensitive?: boolean;
+  threshold?: number;
+};
 
-  const lowerQuery = query.toLowerCase();
+export const fuzzySearch = (
+  query: string,
+  data: string[],
+  options: SearchOptions = { caseSensitive: false, threshold: 2 }
+): string[] => {
+  const { caseSensitive, threshold = 2 } = options;
+  const processedQuery = caseSensitive ? query : query.toLowerCase();
 
-  const results = data
+  const matches = data
     .map(item => ({
       item,
-      distance: calculateLevenshteinDistance(lowerQuery, item.toLowerCase()),
+      distance: optimizedLevenshtein(
+        processedQuery,
+        caseSensitive ? item : item.toLowerCase()
+      ),
     }))
-    .filter(({ distance }) => distance <= threshold); // Filter within threshold
+    .filter(({ distance }) => distance <= threshold);
 
-  if (!results.length) return []; // No matches found
+  if (matches.length === 0) return [];
 
-  // Find minimum distance
-  const minDistance = Math.min(...results.map(({ distance }) => distance));
+  const minDistance = Math.min(...matches.map(({ distance }) => distance));
+  return matches.filter(({ distance }) => distance === minDistance).map(({ item }) => item);
+};
 
-  // Filter results to include only items with the minimum distance
-  const closestMatches = results.filter(({ distance }) => distance === minDistance);
+export const rankedFuzzySearch = (
+  query: string,
+  data: string[],
+  options: SearchOptions = { threshold: 2 }
+): string[] => {
+  const { caseSensitive = false, threshold = 2 } = options;
+  const processedQuery = caseSensitive ? query : query.toLowerCase();
 
-  // Sort alphabetically if there are ties
-  closestMatches.sort((a, b) => a.item.localeCompare(b.item));
+  const matches = data
+    .map(item => {
+      const processedItem = caseSensitive ? item : item.toLowerCase();
+      const distance = optimizedLevenshtein(processedQuery, processedItem);
+      return { item, distance };
+    })
+    .filter(({ distance }) => distance <= threshold)
+    .filter(({ item }) => item.toLowerCase().includes(processedQuery)); // Ensure query is part of the match
 
-  return closestMatches.map(({ item }) => item); // Return sorted matches
+  if (matches.length === 0) return [];
+
+  const score = (distance: number, query: string, item: string) => {
+    const queryLength = query.length;
+    const itemLength = item.length;
+
+    // Penalize items with greater length differences
+    const lengthDiffPenalty = Math.abs(queryLength - itemLength) / Math.max(queryLength, itemLength);
+
+    // Calculate the character overlap
+    const overlap = query
+      .split('')
+      .reduce((count, char) => (item.includes(char) ? count + 1 : count), 0);
+    const overlapPenalty = 1 - overlap / Math.max(queryLength, itemLength); // Reward more overlap
+
+    return distance + lengthDiffPenalty + overlapPenalty; // Combine all factors
+  };
+
+  const scoredMatches = matches.map(({ item, distance }) => ({
+    item,
+    score: score(distance, query, item),
+  }));
+
+  // Sort by score and alphabetically for consistency
+  return scoredMatches
+    .sort((a, b) => a.score - b.score || a.item.localeCompare(b.item))
+    .map(({ item }) => item);
+};
+
+/**
+ * Perform wildcard search on a dataset.
+ */
+export const wildcardSearch = (query: string, data: string[]): string[] => {
+  const regex = new RegExp(`${query.replace(/\*/g, '.*')}`, 'i'); // Case-insensitive wildcard matching
+  return data.filter(item => regex.test(item));
+};
+
+/**
+ * Perform prefix search on a dataset.
+ */
+export const prefixSearch = (query: string, data: string[]): string[] => {
+  return data.filter(item => item.toLowerCase().startsWith(query.toLowerCase()));
+};
+
+/**
+ * Perform suffix search on a dataset.
+ */
+export const suffixSearch = (query: string, data: string[]): string[] => {
+  return data.filter(item => item.toLowerCase().endsWith(query.toLowerCase()));
 };
