@@ -1,6 +1,6 @@
 {
   "name": "custom-search-lib",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A library for advanced search functionalities including fuzzy, wildcard, prefix, and suffix search.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -14,12 +14,18 @@
     "build": "tsc",
     "lint": "eslint src/**/*.ts"
   },
-  "keywords": ["search", "fuzzy", "wildcard", "typescript", "library"],
+  "keywords": [
+    "search",
+    "fuzzy",
+    "wildcard",
+    "typescript",
+    "library"
+  ],
   "author": "Hanif Bahari",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/hanifb1360/custom-search-lib.git"
+    "url": "git+https://github.com/hanifb1360/custom-search-lib.git"
   },
   "dependencies": {
     "lodash": "^4.17.21"
