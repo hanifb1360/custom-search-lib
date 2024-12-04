@@ -50,7 +50,7 @@ jobs:
 
     - name: Bump Version
       run: npm version patch --no-git-tag-version
-      # Use `minor` or `major` as needed, instead of `patch`.
+      # Use `minor` or `major` instead of `patch` if needed.
 
     - name: Build Package
       run: npm run build
