@@ -33,6 +33,9 @@ export const fuzzySearch = (
   data: string[],
   options: SearchOptions = { caseSensitive: false, threshold: 2 }
 ): string[] => {
+  // Return an empty array if the query is empty or contains only whitespace
+  if (!query.trim()) return [];
+
   const { caseSensitive, threshold = 2 } = options;
   const processedQuery = caseSensitive ? query : query.toLowerCase();
 
@@ -112,11 +115,23 @@ export const rankedFuzzySearch = (
 };
 
 /**
- * Perform wildcard search on a dataset.
+ * Perform wildcard search on a dataset with enhanced handling for partial matches.
  */
 export const wildcardSearch = (query: string, data: string[]): string[] => {
-  const regex = new RegExp(`${query.replace(/\*/g, '.*')}`, 'i'); // Case-insensitive wildcard matching
-  return data.filter(item => regex.test(item));
+  if (!query || !data.length) return [];
+
+  // Sanitize query and convert `*` into regex `.*`
+  const sanitizedQuery = query
+    .replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // Escape special regex characters
+    .replace(/\\\*/g, '.*'); // Replace escaped '*' with regex '.*'
+
+  try {
+    const regex = new RegExp(`^${sanitizedQuery}$`, 'i'); // Match full string, case-insensitive
+    return data.filter(item => regex.test(item));
+  } catch (e) {
+    console.error(`Invalid wildcard query: "${query}"`, e);
+    return [];
+  }
 };
 
 /**

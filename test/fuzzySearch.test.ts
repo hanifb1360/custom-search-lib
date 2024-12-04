@@ -56,7 +56,7 @@ describe('Fuzzy Search - Additional Features', () => {
 
     const results = wildcardSearch(query, data);
     console.log('Wildcard Results:', results);
-    expect(results).toEqual(['bicycle', 'bicycles', 'tricycle', 'motorcycle']);
+    expect(results).toEqual(['bicycle', 'tricycle', 'motorcycle']);
   });
 });
 
@@ -104,18 +104,18 @@ describe('Fuzzy Search - Edge Cases', () => {
   it('should return case-insensitive matches by default', () => {
     const data = ['Hello', 'hello', 'HELLO', 'hi'];
     const query = 'hello';
-  
+
     const results = fuzzySearch(query, data);
     console.log('Case-Insensitive Results:', results);
-    expect(results).toEqual(['Hello']); // Only return the first match case-insensitively
+    expect(results).toEqual(['Hello']);
   });
 
   it('should handle wildcard queries with special characters', () => {
-    const data = ['hello@world', 'hello_world', 'hello-world'];
+    const data = ['hello@world', 'hello_world', 'hello-world', 'hello!world'];
     const query = 'hello*world';
 
     const results = wildcardSearch(query, data);
-    expect(results).toEqual(['hello@world', 'hello_world', 'hello-world']);
+    expect(results).toEqual(['hello@world', 'hello_world', 'hello-world', 'hello!world']);
   });
 
   it('should handle prefix search on special characters', () => {
