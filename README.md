@@ -131,3 +131,182 @@ This project is licensed under the MIT License.
 - **Multilingual Support**: Extend fuzzy search for multilingual datasets.
 
 ---
+
+
+## **Example of Implementation in a React/TypeScript App**
+
+- **Below is a complete example of how to use the custom-search-lib in a React/TypeScript application:**
+
+import { useState } from 'react';
+import { 
+  fuzzySearch, 
+  rankedFuzzySearch, 
+  prefixSearch, 
+  suffixSearch, 
+  wildcardSearch 
+} from 'custom-search-lib'; // Import the search functions from the package
+import { SearchResults } from './types/SearchResults'; // Define types for the results
+import { mockData } from './mockData/mockData'; // Simulated dataset for search operations
+
+/**
+ * SearchDemo Component
+ * This component demonstrates various search techniques:
+ * - Fuzzy Search
+ * - Ranked Fuzzy Search
+ * - Prefix Search
+ * - Suffix Search
+ * - Wildcard Search
+ */
+const SearchDemo = () => {
+  const [query, setQuery] = useState(''); // State to store the user input
+  const [results, setResults] = useState<SearchResults>({
+    fuzzy: [],      // Fuzzy search results
+    ranked: [],     // Ranked fuzzy search results
+    prefix: [],     // Prefix search results
+    suffix: [],     // Suffix search results
+    wildcard: [],   // Wildcard search results
+  });
+
+  /**
+   * Perform search using the query and update results for all search types.
+   */
+  const handleSearch = () => {
+    const fuzzyResults = fuzzySearch(query, mockData); // Fuzzy Search
+    const rankedResults = rankedFuzzySearch(query, mockData); // Ranked Fuzzy Search
+    const prefixResults = prefixSearch(query, mockData); // Prefix Search
+    const suffixResults = suffixSearch(query, mockData); // Suffix Search
+    const wildcardResults = wildcardSearch(query, mockData); // Wildcard Search
+
+    // Update results state with results from all search methods
+    setResults({
+      fuzzy: fuzzyResults,
+      ranked: rankedResults,
+      prefix: prefixResults,
+      suffix: suffixResults,
+      wildcard: wildcardResults,
+    });
+  };
+
+  return (
+    <div style={{ padding: '20px' }}>
+      <h1>Search Demo</h1>
+      {/* Input field for the query */}
+      <input
+        type="text"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Enter search query"
+      />
+      {/* Search button */}
+      <button onClick={handleSearch}>Search</button>
+
+      {/* Display results for each search method */}
+      <div>
+        <h3>Fuzzy Search:</h3>
+        <ul>
+          {results.fuzzy.map((item, index) => (
+            <li key={index}>{item}</li>
+          ))}
+        </ul>
+
+        <h3>Ranked Fuzzy Search:</h3>
+        <ul>
+          {results.ranked.map((item, index) => (
+            <li key={index}>{item}</li>
+          ))}
+        </ul>
+
+        <h3>Prefix Search:</h3>
+        <ul>
+          {results.prefix.map((item, index) => (
+            <li key={index}>{item}</li>
+          ))}
+        </ul>
+
+        <h3>Suffix Search:</h3>
+        <ul>
+          {results.suffix.map((item, index) => (
+            <li key={index}>{item}</li>
+          ))}
+        </ul>
+
+        <h3>Wildcard Search:</h3>
+        <ul>
+          {results.wildcard.map((item, index) => (
+            <li key={index}>{item}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+};
+
+export default SearchDemo;
+
+
+## **Steps to Integrate the Library in Your Project**
+1.	Install the package:
+
+npm install custom-search-lib
+
+
+2.	Set up your project:
+	**Create a mockData.ts file with sample data:**
+
+  // Function to generate random strings
+const generateRandomString = (length: number): string => {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return result;
+  };
+  
+  // Function to generate a dataset with random strings
+  const generateLargeDataset = (size: number): string[] => {
+    const dataset: string[] = [];
+    for (let i = 0; i < size; i++) {
+      dataset.push(generateRandomString(10)); // Generate 10-character random strings
+    }
+    return dataset;
+  };
+  
+  // Add some predefined edge cases
+  const predefinedDataset = [
+    'Bicycle',
+    'Bike',
+    'Bicycles',
+    'Tricycle',
+    'Motorcycle',
+    'Hello@World',
+    'Hello_World',
+    'Hello-World',
+    '#Hashtag',
+    'File.txt',
+    'Document.pdf',
+    'Image.jpg',
+    'Special#Character!',
+    'Numbers123',
+    'LongStringWithNoSpaces',
+    'Short',
+    'SuperLongStringWithALotOfCharactersToTestEdgeCases'
+  ];
+  
+  // Combine predefined and generated datasets
+  export const mockData = [...predefinedDataset, ...generateLargeDataset(10000)];
+
+  **Define a SearchResults type:**
+
+  export interface SearchResults {
+  fuzzy: string[];
+  ranked: string[];
+  prefix: string[];
+  suffix: string[];
+  wildcard: string[];
+}
+
+3.	Run the React app:
+	**Add the SearchDemo component to your app and run the development server:**
+
+  npm start
