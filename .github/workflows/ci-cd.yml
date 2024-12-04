@@ -51,8 +51,9 @@ jobs:
     - name: Bump Version
       id: bump-version
       run: |
+        # Increment the version (patch by default)
         npm version patch --no-git-tag-version
-        echo "::set-output name=version::$(node -p "require('./package.json').version")"
+        echo "New version: $(node -p "require('./package.json').version")"
 
     - name: Build Package
       run: npm run build
@@ -67,8 +68,8 @@ jobs:
         git config user.name "github-actions[bot]"
         git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
         git add package.json package-lock.json
-        git commit -m "chore(release): bump version to ${{ steps.bump-version.outputs.version }}"
-        git tag v${{ steps.bump-version.outputs.version }}
+        git commit -m "chore(release): bump version to $(node -p "require('./package.json').version")"
+        git tag v$(node -p "require('./package.json').version")
         git push origin main --tags
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
