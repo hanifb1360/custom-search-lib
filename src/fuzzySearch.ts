@@ -48,8 +48,21 @@ export const fuzzySearch = (
 
   if (matches.length === 0) return [];
 
+  // Find the match with the minimum distance
   const minDistance = Math.min(...matches.map(({ distance }) => distance));
-  return matches.filter(({ distance }) => distance === minDistance).map(({ item }) => item);
+
+  // Deduplicate matches, keeping the first case-insensitive match
+  const deduplicated = matches
+    .filter(({ distance }) => distance === minDistance)
+    .sort((a, b) => a.item.localeCompare(b.item, undefined, { sensitivity: 'base' }))
+    .reduce((unique, current) => {
+      if (!unique.some(item => item.item.toLowerCase() === current.item.toLowerCase())) {
+        unique.push(current);
+      }
+      return unique;
+    }, [] as typeof matches);
+
+  return deduplicated.map(({ item }) => item);
 };
 
 export const rankedFuzzySearch = (
