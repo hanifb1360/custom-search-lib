@@ -1,6 +1,7 @@
 {
   "name": "custom-search-lib",
   "version": "1.0.9",
+  "private": true,
   "description": "A library for advanced search functionalities including fuzzy, wildcard, prefix, and suffix search.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
