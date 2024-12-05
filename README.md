@@ -154,6 +154,7 @@ This project is licensed under the MIT License.
 
 - **Below is a complete example of how to use the custom-search-lib in a React/TypeScript application:**
 
+```typescript
 import { useState } from 'react';
 import { 
   fuzzySearch, 
@@ -165,15 +166,6 @@ import {
 import { SearchResults } from './types/SearchResults'; // Define types for the results
 import { mockData } from './mockData/mockData'; // Simulated dataset for search operations
 
-/**
- * SearchDemo Component
- * This component demonstrates various search techniques:
- * - Fuzzy Search
- * - Ranked Fuzzy Search
- * - Prefix Search
- * - Suffix Search
- * - Wildcard Search
- */
 const SearchDemo = () => {
   const [query, setQuery] = useState(''); // State to store the user input
   const [results, setResults] = useState<SearchResults>({
@@ -259,17 +251,20 @@ const SearchDemo = () => {
 };
 
 export default SearchDemo;
-
+```
 
 ## **Steps to Integrate the Library in Your Project**
 1.	Install the package:
 
+```typescript
 npm install custom-search-lib
+```
 
 
 2.	Set up your project:
 	**Create a mockData.ts file with sample data:**
 
+```typescript
   // Function to generate random strings
 const generateRandomString = (length: number): string => {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -322,8 +317,11 @@ const generateRandomString = (length: number): string => {
   suffix: string[];
   wildcard: string[];
 }
+```
 
 3.	Run the React app:
 	**Add the SearchDemo component to your app and run the development server:**
-
+  
+```typescript
   npm start
+  ```
