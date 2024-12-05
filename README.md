@@ -122,6 +122,11 @@ This project is licensed under the MIT License.
 
 - **Below is a complete example of how to use the custom-search-lib in a React/TypeScript application:**
 
+
+
+## **Steps to Integrate the Library in Your Project**
+1.	The main component:
+
 ```typescript
 import { useState } from 'react';
 import { 
@@ -221,16 +226,9 @@ const SearchDemo = () => {
 export default SearchDemo;
 ```
 
-## **Steps to Integrate the Library in Your Project**
-1.	Install the package:
-
-```typescript
-npm install custom-search-lib
-```
 
 
-2.	Set up your project:
-	**Create a mockData.ts file with sample data:**
+2. **Create a mockData.ts file with sample data:**
 
 ```typescript
   // Function to generate random strings
@@ -275,9 +273,12 @@ const generateRandomString = (length: number): string => {
   
   // Combine predefined and generated datasets
   export const mockData = [...predefinedDataset, ...generateLargeDataset(10000)];
+```
+
 
   **Define a SearchResults type:**
 
+```typescript
   export interface SearchResults {
   fuzzy: string[];
   ranked: string[];
