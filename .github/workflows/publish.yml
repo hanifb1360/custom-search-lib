@@ -16,7 +16,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '18' # Use your project's Node.js version
+        node-version: '18'
         registry-url: 'https://registry.npmjs.org/'
 
     - name: Install dependencies
@@ -28,13 +28,16 @@ jobs:
     - name: Build the library
       run: npm run build
 
+    - name: Configure Git identity
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+
     - name: Bump version and push changes
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Token to allow pushing back to the repo
       run: |
         npm version patch -m "Bump version to %s [skip ci]"
-        git config user.name "github-actions[bot]"
-        git config user.email "github-actions[bot]@users.noreply.github.com"
         git push origin main --follow-tags # Push changes and tags back to the repository
 
     - name: Publish Private Package to NPM
