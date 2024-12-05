@@ -38,9 +38,9 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Token to allow pushing back to the repo
       run: |
         npm version patch -m "Bump version to %s [skip ci]"
-        git push origin main --follow-tags # Push changes and tags back to the repository
+        git push origin main --follow-tags
 
     - name: Publish Private Package to NPM
       env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} # Use the NPM token from GitHub Secrets
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       run: npm publish --access restricted
