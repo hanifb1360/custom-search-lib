@@ -112,40 +112,8 @@ The scoring algorithm in `rankedFuzzySearch` combines:
 
 ---
 
-## **Testing**
-Run the test suite to verify functionality:
-```bash
-npm test
-```
-
----
-
-## **Performance**
-The library is optimized for performance but can handle large datasets efficiently:
-- Uses an optimized Levenshtein algorithm.
-- Benchmarked for datasets of up to 100,000 entries.
-
----
-
-## **Contributing**
-Contributions are welcome! To get started:
-1. Fork the repository.
-2. Create a feature branch: `git checkout -b feature/my-feature`.
-3. Commit your changes: `git commit -m "Add a new feature"`.
-4. Push to the branch: `git push origin feature/my-feature`.
-5. Open a pull request.
-
----
-
 ## **License**
 This project is licensed under the MIT License.
-
----
-
-## **Future Enhancements**
-- **Regex-based Search**: Advanced pattern matching with regular expressions.
-- **Highlight Matches**: Mark matched portions of results.
-- **Multilingual Support**: Extend fuzzy search for multilingual datasets.
 
 ---
 
