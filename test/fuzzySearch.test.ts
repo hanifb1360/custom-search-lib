@@ -134,3 +134,26 @@ describe('Fuzzy Search - Edge Cases', () => {
     expect(results).toEqual(['file.txt']);
   });
 });
+
+describe('Suffix Search', () => {
+  it('should return items ending with the query', () => {
+    const data = ['bicycle', 'tricycle', '4Uh7Ftdblc', 'randomWord'];
+    const query = 'cle';
+    const results = suffixSearch(query, data);
+    expect(results).toEqual(['bicycle', 'tricycle']); // Correctly matches suffix "cle"
+  });
+
+  it('should handle case-insensitivity', () => {
+    const data = ['File.txt', 'file.TXT', 'image.png'];
+    const query = '.txt';
+    const results = suffixSearch(query, data);
+    expect(results).toEqual(['File.txt', 'file.TXT']); // Matches .txt regardless of case
+  });
+
+  it('should return an empty array when no matches are found', () => {
+    const data = ['bicycle', 'tricycle', 'randomWord'];
+    const query = 'xyz';
+    const results = suffixSearch(query, data);
+    expect(results).toEqual([]); // No items end with "xyz"
+  });
+});
