@@ -19,86 +19,197 @@ npm install custom-search-lib
 
 ---
 
-## **Usage**
-### **Basic Setup**
-Import the desired functions:
+
+## **React TypeScript Example Implementation
+1. SearchDemo Component
+
+The main component demonstrates the use of various search functionalities, including filtering, sorting, and faceted search.
+
 ```typescript
-import {
-  fuzzySearch,
-  rankedFuzzySearch,
-  prefixSearch,
-  suffixSearch,
+import { useState } from 'react';
+import { 
+  fuzzySearch, 
+  rankedFuzzySearch, 
+  prefixSearch, 
+  suffixSearch, 
   wildcardSearch,
-} from 'custom-search-lib';
-```
+  applyFilters,
+  sortData,
+  generateFacets,
+} from 'custom-search-lib'; 
+import { SearchResults } from './types/SearchResults'; 
+import { mockData } from './mockData/mockData'; 
 
-### **1. Fuzzy Search**
-Find results based on Levenshtein distance.
+const SearchDemo = () => {
+  const [query, setQuery] = useState(''); 
+  const [filters] = useState({ category: 'Books' }); // Example filter
+  const [sortConfig] = useState<{ field: string; order: 'asc' | 'desc' }[]>([{ field: 'price', order: 'asc' }]);
+  const [results, setResults] = useState<SearchResults>({
+    fuzzy: [],
+    ranked: [],
+    prefix: [],
+    suffix: [],
+    wildcard: [],
+    filtered: [],
+    sorted: [],
+    facets: {},
+  });
+
+  const handleSearch = () => {
+    const fuzzyResults = fuzzySearch(query, mockData.map(item => item.name));
+    const rankedResults = rankedFuzzySearch(query, mockData.map(item => item.name));
+    const prefixResults = prefixSearch(query, mockData.map(item => item.name));
+    const suffixResults = suffixSearch(query, mockData.map(item => item.name));
+    const wildcardResults = wildcardSearch(query, mockData.map(item => item.name));
+    const filteredResults = applyFilters(mockData, filters);
+    const sortedResults = sortData(mockData, sortConfig);
+    const facets = generateFacets(mockData, ['category']);
+
+    setResults({
+      fuzzy: fuzzyResults,
+      ranked: rankedResults,
+      prefix: prefixResults,
+      suffix: suffixResults,
+      wildcard: wildcardResults,
+      filtered: filteredResults,
+      sorted: sortedResults,
+      facets: facets,
+    });
+  };
+
+  return (
+    <div style={{ padding: '20px' }}>
+      <h1>Search Demo</h1>
+      <input
+        type="text"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Enter search query"
+      />
+      <button onClick={handleSearch}>Search</button>
+
+      {/* Filtering Example */}
+      <div>
+        <h3>Filtered Results:</h3>
+        <ul>
+          {results.filtered.map((item, index) => (
+            <li key={index}>{item.name} - ${item.price}</li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Sorting Example */}
+      <div>
+        <h3>Sorted Results:</h3>
+        <ul>
+          {results.sorted.map((item, index) => (
+            <li key={index}>{item.name} - ${item.price}</li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Faceted Search Example */}
+      <div>
+        <h3>Facets:</h3>
+        <ul>
+          {Object.entries(results.facets.category || {}).map(([key, count]) => (
+            <li key={key}>{key}: {count}</li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Other Search Results */}
+      <div>
+        <h3>Fuzzy Search:</h3>
+        <ul>
+          {results.fuzzy.map((item, index) => <li key={index}>{item}</li>)}
+        </ul>
+
+        <h3>Ranked Fuzzy Search:</h3>
+        <ul>
+          {results.ranked.map((item, index) => <li key={index}>{item}</li>)}
+        </ul>
+
+        <h3>Prefix Search:</h3>
+        <ul>
+          {results.prefix.map((item, index) => <li key={index}>{item}</li>)}
+        </ul>
+
+        <h3>Suffix Search:</h3>
+        <ul>
+          {results.suffix.map((item, index) => <li key={index}>{item}</li>)}
+        </ul>
+
+        <h3>Wildcard Search:</h3>
+        <ul>
+          {results.wildcard.map((item, index) => <li key={index}>{item}</li>)}
+        </ul>
+      </div>
+    </div>
+  );
+};
+
+export default SearchDemo;
+
+```
+2. SearchResults Interface
+
+Defines the structure for managing search results.
+
 ```typescript
-const data = ['bicycle', 'bike', 'bicycles', 'tricycle'];
-const query = 'bicyc';
-
-const results = fuzzySearch(query, data, { threshold: 2 });
-console.log(results); // ['bicycle']
+export interface SearchResults {
+  fuzzy: string[];
+  ranked: string[];
+  prefix: string[];
+  suffix: string[];
+  wildcard: string[];
+  filtered: any[]; // Results after applying filters
+  sorted: any[]; // Results after sorting
+  facets: { [key: string]: { [value: string]: number } }; // Facets
+}
 ```
 
-### **2. Ranked Fuzzy Search**
-Sort results by relevance using a scoring system.
+3. Mock Data
+
+Provides a large dataset for testing the search functionalities.
+
 ```typescript
-const results = rankedFuzzySearch(query, data, { threshold: 2 });
-console.log(results); // ['bicycle', 'bicycles']
-```
+const generateRandomString = (length: number): string => {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return result;
+};
 
-### **3. Wildcard Search**
-Use `*` as a wildcard to match patterns.
-```typescript
-const data = ['bicycle', 'tricycle', 'motorcycle'];
-const query = '*cycle';
+const generateLargeDataset = (size: number): Array<{ name: string; category: string; price: number }> => {
+  const categories = ['Books', 'Electronics', 'Clothing', 'Home Appliances', 'Toys', 'Miscellaneous'];
+  const dataset: Array<{ name: string; category: string; price: number }> = [];
+  for (let i = 0; i < size; i++) {
+    dataset.push({
+      name: generateRandomString(10),
+      category: categories[Math.floor(Math.random() * categories.length)],
+      price: Math.floor(Math.random() * 500),
+    });
+  }
+  return dataset;
+};
 
-const results = wildcardSearch(query, data);
-console.log(results); // ['bicycle', 'tricycle', 'motorcycle']
-```
+const predefinedDataset = [
+  { name: 'Bicycle', category: 'Sports', price: 150 },
+  { name: 'Bike', category: 'Sports', price: 200 },
+  { name: 'Bicycles', category: 'Sports', price: 180 },
+  { name: 'Tricycle', category: 'Sports', price: 120 },
+  { name: 'Motorcycle', category: 'Vehicles', price: 1500 },
+  { name: 'Hello@World', category: 'Miscellaneous', price: 50 },
+  { name: 'Laptop', category: 'Electronics', price: 1000 },
+  { name: 'Smartphone', category: 'Electronics', price: 800 },
+  { name: 'Headphones', category: 'Electronics', price: 150 },
+];
 
-### **4. Prefix Search**
-Find results that start with the query.
-```typescript
-const results = prefixSearch('bi', data);
-console.log(results); // ['bicycle', 'bike']
-```
+export const mockData = [...predefinedDataset, ...generateLargeDataset(5000)];
 
-### **5. Suffix Search**
-Find results that end with the query.
-```typescript
-const results = suffixSearch('cycle', data);
-console.log(results); // ['bicycle', 'tricycle', 'motorcycle']
-```
-
----
-
-## **Configuration Options**
-Most functions support the following options:
-- `caseSensitive` (default: `false`): Enables case-sensitive matching.
-- `threshold` (default: `2`): Sets the maximum allowable Levenshtein distance for fuzzy searches.
-
-Example:
-```typescript
-const results = fuzzySearch('Bicycle', data, { caseSensitive: true, threshold: 3 });
-```
-
----
-
-## **Scoring in Ranked Fuzzy Search**
-The scoring algorithm in `rankedFuzzySearch` combines:
-1. **Levenshtein Distance**: Penalizes mismatched characters.
-2. **Length Difference**: Penalizes results with significant length differences.
-3. **Character Overlap**: Rewards matches with more overlapping characters.
-
----
-
-## **Testing**
-Run the test suite to verify functionality:
-```bash
-npm test
 ```
 
 ---
@@ -110,24 +221,7 @@ The library is optimized for performance but can handle large datasets efficient
 
 ---
 
-## **Contributing**
-Contributions are welcome! To get started:
-1. Fork the repository.
-2. Create a feature branch: `git checkout -b feature/my-feature`.
-3. Commit your changes: `git commit -m "Add a new feature"`.
-4. Push to the branch: `git push origin feature/my-feature`.
-5. Open a pull request.
-
----
-
 ## **License**
 This project is licensed under the MIT License.
-
----
-
-## **Future Enhancements**
-- **Regex-based Search**: Advanced pattern matching with regular expressions.
-- **Highlight Matches**: Mark matched portions of results.
-- **Multilingual Support**: Extend fuzzy search for multilingual datasets.
 
 ---
