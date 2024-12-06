@@ -1,13 +1,16 @@
 # **Custom Search Library**
 
-**Custom Search Library** is a versatile JavaScript/TypeScript library for implementing advanced search functionalities. It supports fuzzy search, ranked results, prefix/suffix matching, and wildcard queries, all with configurable options for diverse use cases.
+**Custom Search Library** is a versatile JavaScript/TypeScript library for implementing advanced search functionalities. It supports fuzzy search, ranked results, prefix/suffix matching, advanced filtering, sorting, faceted searching and wildcard queries, all with configurable options for diverse use cases.
 
 ## **Features**
 - **Fuzzy Search**: Finds results based on Levenshtein distance with configurable thresholds.
 - **Ranked Fuzzy Search**: Sorts results by relevance using a scoring mechanism.
 - **Wildcard Search**: Allows pattern matching using wildcards (`*`).
 - **Prefix and Suffix Search**: Matches strings that start or end with the query.
-- **Highly Configurable**: Supports case sensitivity and custom thresholds.
+- **Advanced Filtering**: Apply exact, range, or multi-value filters with support for AND/OR logic.
+- **Sorting**: Multi-level sorting with locale-aware string comparison.
+- **Faceted Search**: Generates facets (categories) with counts for better insights into datasets.
+- **Highly Configurable**: Supports case sensitivity, custom thresholds, and multi-field operations.
 
 ---
 
