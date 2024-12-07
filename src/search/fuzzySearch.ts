@@ -1,5 +1,5 @@
+import { normalizeText } from '../utils/textUtils'; // Adjust path as per your folder structure
 import { optimizedLevenshtein } from '../utils/levenshtein';
-
 
 /**
  * Perform fuzzy search with additional options.
@@ -14,20 +14,21 @@ export type SearchOptions = {
     data: string[],
     options: SearchOptions = { caseSensitive: false, threshold: 2 }
   ): string[] => {
-    // Return an empty array if the query is empty or contains only whitespace
     if (!query.trim()) return [];
   
     const { caseSensitive, threshold = 2 } = options;
-    const processedQuery = caseSensitive ? query : query.toLowerCase();
+  
+    // Normalize query if case-insensitive
+    const processedQuery = caseSensitive ? query : normalizeText(query);
   
     const matches = data
-      .map(item => ({
-        item,
-        distance: optimizedLevenshtein(
-          processedQuery,
-          caseSensitive ? item : item.toLowerCase()
-        ),
-      }))
+      .map(item => {
+        const processedItem = caseSensitive ? item : normalizeText(item);
+        return {
+          item,
+          distance: optimizedLevenshtein(processedQuery, processedItem),
+        };
+      })
       .filter(({ distance }) => distance <= threshold);
   
     if (matches.length === 0) return [];
@@ -35,12 +36,11 @@ export type SearchOptions = {
     // Find the match with the minimum distance
     const minDistance = Math.min(...matches.map(({ distance }) => distance));
   
-    // Deduplicate matches, keeping the first case-insensitive match
+    // Deduplicate matches, keeping the first normalized match
     const deduplicated = matches
       .filter(({ distance }) => distance === minDistance)
-      .sort((a, b) => a.item.localeCompare(b.item, undefined, { sensitivity: 'base' }))
       .reduce((unique, current) => {
-        if (!unique.some(item => item.item.toLowerCase() === current.item.toLowerCase())) {
+        if (!unique.some(item => normalizeText(item.item) === normalizeText(current.item))) {
           unique.push(current);
         }
         return unique;
