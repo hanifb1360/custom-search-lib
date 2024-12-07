@@ -5,7 +5,7 @@ import {
   prefixSearch,
   suffixSearch,
   wildcardSearch,
-} from '../src/fuzzySearch';
+} from '../src/index';
 
 describe('Property-based tests for Fuzzy Search', () => {
   describe('Fuzzy Search', () => {
