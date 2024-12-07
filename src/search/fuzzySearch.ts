@@ -1,4 +1,4 @@
-import { normalizeText } from '../utils/textUtils'; // Adjust path as per your folder structure
+import { normalizeText } from '../utils/textUtils'; 
 import { optimizedLevenshtein } from '../utils/levenshtein';
 
 /**

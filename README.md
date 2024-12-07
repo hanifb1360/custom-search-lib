@@ -1,6 +1,6 @@
 # **Custom Search Library**
 
-**Custom Search Library** is a versatile JavaScript/TypeScript library for implementing advanced search functionalities. It supports fuzzy search, ranked results, prefix/suffix matching, advanced filtering, sorting, faceted searching and wildcard queries, all with configurable options for diverse use cases.
+**Custom Search Library** is a versatile JavaScript/TypeScript library for implementing advanced search functionalities. It supports fuzzy search, ranked results, prefix/suffix matching, advanced filtering, sorting, faceted searching, wildcard queries, and now supports normalization of special characters across multiple languages, all with configurable options for diverse use cases.
 
 ## **Features**
 - **Fuzzy Search**: Finds results based on Levenshtein distance with configurable thresholds.
@@ -11,13 +11,37 @@
 - **Sorting**: Multi-level sorting with locale-aware string comparison.
 - **Faceted Search**: Generates facets (categories) with counts for better insights into datasets.
 - **Highly Configurable**: Supports case sensitivity, custom thresholds, and multi-field operations.
+- **Language-Specific Normalization**: Handles special characters for languages like Swedish, Danish, Norwegian, Turkish, French, Spanish, Polish, Czech, Slovak, Hungarian, Greek, and more.
 
 ---
-
 ## **Installation**
 Install the library via npm:
 ```bash
 npm install custom-search-lib
+```
+
+---
+
+## **New Language Support Feature**
+
+With the latest update, the library now includes support for special characters from multiple languages, including:
+- **German**: Handles characters like `ß`, `ä`, `ö`, and `ü`.
+- **Swedish, Danish, Norwegian**: Normalizes `ä`, `å`, `ö`, `ø`, and `æ`.
+- **Turkish**: Converts `ç`, `ğ`, `ı`, `ş`, and `ü`.
+- **French**: Handles `œ`, `é`, `è`, `ê`, `ë`, `à`, `â`, `ù`, `û`, `î`, `ï`, and `ç`.
+- **Spanish**: Processes `ñ`, `á`, `í`, `ó`, and `ú`.
+- **Polish**: Normalizes `ą`, `ć`, `ę`, `ł`, `ń`, `ó`, `ś`, `ź`, and `ż`.
+- **Czech and Slovak**: Handles `č`, `ď`, `ě`, `ň`, `ř`, `š`, `ť`, `ů`, and `ž`.
+- **Hungarian**: Converts `á`, `é`, `í`, `ó`, `ö`, `ő`, `ú`, `ü`, and `ű`.
+- **Greek**: Provides transliterations for Greek characters, including `α` to `ω`.
+- **Others**: Includes mappings for characters like `ý`, `đ`, and `ħ`.
+
+### Example Usage of Language Normalization:
+```typescript
+import { normalizeText } from 'custom-search-lib';
+
+const normalized = normalizeText('Göteborg, Ærø, Crème brûlée, Ελληνικά');
+console.log(normalized); // Output: 'goteborg, aero, creme brulee, ellinika'
 ```
 
 ---
