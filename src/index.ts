@@ -6,3 +6,4 @@ export { normalizeText } from './utils/textUtils';
 export { applyFilters } from './filters';
 export { sortData } from './sort';
 export { generateFacets } from './analysis'; 
+

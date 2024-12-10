@@ -1,5 +1,5 @@
-import { normalizeText } from '../utils/textUtils'; 
-import { optimizedLevenshtein } from '../utils/levenshtein';
+import { normalizeText, optimizedLevenshtein } from '../utils/index'; 
+
 
 /**
  * Perform fuzzy search with additional options.

@@ -1,4 +1,4 @@
-import { normalizeText } from '../src/utils/textUtils';
+import { normalizeText } from '../src/utils/index';
 
 describe('normalizeText', () => {
   it('should remove diacritics and normalize special characters across languages', () => {
