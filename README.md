@@ -12,6 +12,7 @@
 - **Faceted Search**: Generates facets (categories) with counts for better insights into datasets.
 - **Highly Configurable**: Supports case sensitivity, custom thresholds, and multi-field operations.
 - **Language-Specific Normalization**: Handles special characters for languages like Swedish, Danish, Norwegian, Turkish, French, Spanish, Polish, Czech, Slovak, Hungarian, Greek, and more.
+- **Fuzzy Search for Persian**: A dedicated fuzzy search function tailored for Persian text.
 
 ---
 ## **Installation**
@@ -24,7 +25,7 @@ npm install custom-search-lib
 
 ## **New Language Support Feature**
 
-With the latest update, the library now includes support for special characters from multiple languages, including:
+The library now includes support for special characters from multiple languages, including:
 - **German**: Handles characters like `ß`, `ä`, `ö`, and `ü`.
 - **Swedish, Danish, Norwegian**: Normalizes `ä`, `å`, `ö`, `ø`, and `æ`.
 - **Turkish**: Converts `ç`, `ğ`, `ı`, `ş`, and `ü`.
@@ -34,6 +35,9 @@ With the latest update, the library now includes support for special characters 
 - **Czech and Slovak**: Handles `č`, `ď`, `ě`, `ň`, `ř`, `š`, `ť`, `ů`, and `ž`.
 - **Hungarian**: Converts `á`, `é`, `í`, `ó`, `ö`, `ő`, `ú`, `ü`, and `ű`.
 - **Greek**: Provides transliterations for Greek characters, including `α` to `ω`.
+- **Arabic and Persian**: 
+  - **Arabic**: Normalizes `أ`, `إ`, `آ`, `ؤ`, `ئ`, `ة`, and `ى` to their standard forms.
+  - **Persian**: Converts `ي`, `ك`, `ۀ`, `پ`, `چ`, `ژ`, and `گ` to their standardized forms.
 - **Others**: Includes mappings for characters like `ý`, `đ`, and `ħ`.
 
 ### Example Usage of Language Normalization:
@@ -57,6 +61,8 @@ import { useState } from 'react';
 import { 
   fuzzySearch, 
   rankedFuzzySearch, 
+  fuzzySearchPersian, 
+  rankedFuzzySearchPersian, 
   prefixSearch, 
   suffixSearch, 
   wildcardSearch,
@@ -74,6 +80,8 @@ const SearchDemo = () => {
   const [results, setResults] = useState<SearchResults>({
     fuzzy: [],
     ranked: [],
+    persianFuzzy: [],
+    persianRanked: [],
     prefix: [],
     suffix: [],
     wildcard: [],
@@ -85,6 +93,8 @@ const SearchDemo = () => {
   const handleSearch = () => {
     const fuzzyResults = fuzzySearch(query, mockData.map(item => item.name));
     const rankedResults = rankedFuzzySearch(query, mockData.map(item => item.name));
+    const persianFuzzyResults = fuzzySearchPersian(query, mockData.map(item => item.name), { threshold: 2 });
+    const persianRankedResults = rankedFuzzySearchPersian(query, mockData.map(item => item.name), { threshold: 2 });
     const prefixResults = prefixSearch(query, mockData.map(item => item.name));
     const suffixResults = suffixSearch(query, mockData.map(item => item.name));
     const wildcardResults = wildcardSearch(query, mockData.map(item => item.name));
@@ -95,6 +105,8 @@ const SearchDemo = () => {
     setResults({
       fuzzy: fuzzyResults,
       ranked: rankedResults,
+      persianFuzzy: persianFuzzyResults,
+      persianRanked: persianRankedResults,
       prefix: prefixResults,
       suffix: suffixResults,
       wildcard: wildcardResults,
@@ -157,6 +169,16 @@ const SearchDemo = () => {
           {results.ranked.map((item, index) => <li key={index}>{item}</li>)}
         </ul>
 
+        <h3>Persian Fuzzy Search:</h3>
+        <ul>
+          {results.persianFuzzy.map((item, index) => <li key={index}>{item}</li>)}
+        </ul>
+
+        <h3>Persian Ranked Fuzzy Search:</h3>
+        <ul>
+          {results.persianRanked.map((item, index) => <li key={index}>{item}</li>)}
+        </ul>
+
         <h3>Prefix Search:</h3>
         <ul>
           {results.prefix.map((item, index) => <li key={index}>{item}</li>)}
@@ -187,12 +209,14 @@ Defines the structure for managing search results.
 export interface SearchResults {
   fuzzy: string[];
   ranked: string[];
+  persianFuzzy: string[];
+  persianRanked: string[];
   prefix: string[];
   suffix: string[];
   wildcard: string[];
-  filtered: any[]; // Results after applying filters
-  sorted: any[]; // Results after sorting
-  facets: { [key: string]: { [value: string]: number } }; // Facets
+  filtered: any[];
+  sorted: any[];
+  facets: { [key: string]: { [value: string]: number } };
 }
 ```
 
@@ -236,6 +260,45 @@ const predefinedDataset = [
 ];
 
 export const mockData = [...predefinedDataset, ...generateLargeDataset(5000)];
+
+```
+
+4. Mock Data in Persian to use with fuzzySearchPersian and rankedFuzzySearchPersian in a demo app.
+
+```typescript
+const generateRandomPersianString = (length: number): string => {
+  const characters = 'ابپتثجچحخدذرزژسشصضطظعغفقکگلمنوهی';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return result;
+};
+
+const generateLargePersianDataset = (size: number): Array<{ name: string; category: string; price: number }> => {
+  const categories = ['کتاب‌ها', 'الکترونیک', 'پوشاک', 'لوازم خانگی', 'اسباب‌بازی', 'متفرقه'];
+  const dataset: Array<{ name: string; category: string; price: number }> = [];
+  for (let i = 0; i < size; i++) {
+    dataset.push({
+      name: generateRandomPersianString(10), // Generate a random Persian name
+      category: categories[Math.floor(Math.random() * categories.length)],
+      price: Math.floor(Math.random() * 500),
+    });
+  }
+  return dataset;
+};
+
+const predefinedPersianDataset = [
+  { name: 'دوچرخه', category: 'ورزش', price: 150 },
+  { name: 'موتورسیکلت', category: 'وسایل نقلیه', price: 1500 },
+  { name: 'کتاب ریاضی', category: 'کتاب‌ها', price: 200 },
+  { name: 'لپ‌تاپ', category: 'الکترونیک', price: 1000 },
+  { name: 'هدفون', category: 'الکترونیک', price: 150 },
+  { name: 'اسباب‌بازی چوبی', category: 'اسباب‌بازی', price: 300 },
+  { name: 'یخچال', category: 'لوازم خانگی', price: 500 },
+];
+
+export const persianMockData = [...predefinedPersianDataset, ...generateLargePersianDataset(5000)];
 
 ```
 

@@ -19,7 +19,8 @@
     "fuzzy",
     "wildcard",
     "typescript",
-    "library"
+    "library",
+    "persian"
   ],
   "author": "Hanif Bahari",
   "license": "MIT",
