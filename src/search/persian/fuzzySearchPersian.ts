@@ -61,6 +61,7 @@ export const rankedFuzzySearchPersian = (
   if (!query.trim()) return [];
 
   const { caseSensitive, threshold = 2 } = options;
+
   const normalizePersian = (text: string) =>
     text
       .replace(/ي/g, 'ی')
@@ -70,7 +71,6 @@ export const rankedFuzzySearchPersian = (
       .replace(/ئ/g, 'ی');
 
   const processedQuery = caseSensitive ? query : normalizePersian(query).toLowerCase();
-  console.log("Normalized Query:", processedQuery);
 
   const matches = data
     .map(item => {
@@ -90,9 +90,9 @@ export const rankedFuzzySearchPersian = (
     // Penalize length differences
     const lengthDiffPenalty = Math.pow(Math.abs(queryLength - itemLength) / Math.max(queryLength, itemLength), 2);
 
-    // Penalize overlap
+    // Reward overlap
     const overlap = query.split('').reduce((count, char) => (item.includes(char) ? count + 1 : count), 0);
-    const overlapPenalty = (1 - overlap / Math.max(queryLength, itemLength)) * 2;
+    const overlapPenalty = 1 - overlap / Math.max(queryLength, itemLength);
 
     return distance + lengthDiffPenalty + overlapPenalty;
   };
@@ -102,15 +102,9 @@ export const rankedFuzzySearchPersian = (
     score: score(distance, processedQuery, item),
   }));
 
-  scoredMatches.forEach(({ item, score }) => {
-    console.log("Item:", item, "Score:", score);
-  });
-
   const sortedMatches = scoredMatches
     .sort((a, b) => a.score - b.score || a.item.localeCompare(b.item))
     .map(({ item }) => item);
-
-  console.log("Sorted Matches:", sortedMatches);
 
   return sortedMatches;
 };
