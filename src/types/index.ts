@@ -19,10 +19,13 @@ export interface RankedSearchResult<T> {
   distance: number;
 }
 
-export interface FullTextSearchOptions<T> {
+export interface FullTextSearchOptions<T extends object> {
   fields: readonly (keyof T)[];
   operator?: 'and' | 'or';
   caseSensitive?: boolean;
+  trim?: boolean;
+  unicode?: boolean;
+  removeDiacritics?: boolean;
 }
 
 export type SortOrder = 'asc' | 'desc';

@@ -1,86 +1,267 @@
-import { fullTextSearch } from '../../src/search/fullTextSearch';
+import { fullTextSearch } from '../../src';
 
-describe('Full Text Search', () => {
-  it('should return items that match the query', () => {
-    const data = [
-      { title: 'Red Bicycle', description: 'A bright red bike' },
-      { title: 'Blue Bicycle', description: 'A cool blue bike' },
-      { title: 'Car', description: 'A fast car' },
-    ];
-    const query = 'bicycle';
+describe('fullTextSearch', () => {
+  const products = [
+    {
+      title: 'Red Bicycle',
+      description: 'Lightweight city bike',
+      category: 'Transport',
+      year: 2024,
+    },
+    {
+      title: 'Blue Bicycle',
+      description: 'Fast road bike',
+      category: 'Transport',
+      year: 2025,
+    },
+    {
+      title: 'Red Helmet',
+      description: 'Protective cycling equipment',
+      category: 'Accessories',
+      year: 2026,
+    },
+    {
+      title: 'Coffee Machine',
+      description: 'Automatic kitchen appliance',
+      category: 'Kitchen',
+      year: 2024,
+    },
+  ];
 
-    const results = fullTextSearch(query, data, ['title', 'description']);
+  it('matches all query tokens by default', () => {
+    const results = fullTextSearch(
+      'red bicycle',
+      products,
+      {
+        fields: [
+          'title',
+          'description',
+        ],
+      }
+    );
+
     expect(results).toEqual([
-      { title: 'Red Bicycle', description: 'A bright red bike' },
-      { title: 'Blue Bicycle', description: 'A cool blue bike' },
+      products[0],
     ]);
   });
 
-  it('should return an empty array if no items match the query', () => {
+  it('allows tokens to match across different fields', () => {
     const data = [
-      { title: 'Car', description: 'A fast car' },
-      { title: 'Bus', description: 'A big yellow bus' },
+      {
+        title: 'Red Product',
+        description: 'Lightweight bicycle',
+      },
+      {
+        title: 'Blue Product',
+        description: 'Lightweight bicycle',
+      },
     ];
-    const query = 'bicycle';
 
-    const results = fullTextSearch(query, data, ['title', 'description']);
+    const results = fullTextSearch(
+      'red bicycle',
+      data,
+      {
+        fields: [
+          'title',
+          'description',
+        ],
+      }
+    );
+
+    expect(results).toEqual([
+      data[0],
+    ]);
+  });
+
+  it('supports the or operator', () => {
+    const results = fullTextSearch(
+      'red bicycle',
+      products,
+      {
+        fields: ['title'],
+        operator: 'or',
+      }
+    );
+
+    expect(results).toEqual([
+      products[0],
+      products[1],
+      products[2],
+    ]);
+  });
+
+  it('is case-insensitive by default', () => {
+    const results = fullTextSearch(
+      'RED BICYCLE',
+      products,
+      {
+        fields: ['title'],
+      }
+    );
+
+    expect(results).toEqual([
+      products[0],
+    ]);
+  });
+
+  it('supports case-sensitive search', () => {
+    const data = [
+      {
+        title: 'Bicycle',
+      },
+      {
+        title: 'bicycle',
+      },
+    ];
+
+    const results = fullTextSearch(
+      'bicycle',
+      data,
+      {
+        fields: ['title'],
+        caseSensitive: true,
+      }
+    );
+
+    expect(results).toEqual([
+      data[1],
+    ]);
+  });
+
+  it('handles repeated whitespace in the query', () => {
+    const results = fullTextSearch(
+      '  red    bicycle  ',
+      products,
+      {
+        fields: ['title'],
+      }
+    );
+
+    expect(results).toEqual([
+      products[0],
+    ]);
+  });
+
+  it('can search numeric field values safely', () => {
+    const results = fullTextSearch(
+      '2025',
+      products,
+      {
+        fields: ['year'],
+      }
+    );
+
+    expect(results).toEqual([
+      products[1],
+    ]);
+  });
+
+  it('can search across string and numeric fields together', () => {
+    const results = fullTextSearch(
+      'blue 2025',
+      products,
+      {
+        fields: [
+          'title',
+          'year',
+        ],
+      }
+    );
+
+    expect(results).toEqual([
+      products[1],
+    ]);
+  });
+
+  it('returns an empty array for an empty query', () => {
+    const results = fullTextSearch(
+      '',
+      products,
+      {
+        fields: ['title'],
+      }
+    );
+
     expect(results).toEqual([]);
   });
-});
 
-describe('Full Text Search - Edge Cases', () => {
-    it('should handle an empty dataset gracefully', () => {
-      const data: Array<{ [key: string]: string }> = [];
-      const query = 'bicycle';
-  
-      const results = fullTextSearch(query, data, ['title', 'description']);
-      expect(results).toEqual([]); // No data, so no matches
-    });
-  
-    it('should handle an empty query gracefully', () => {
-        const data = [
-          { title: 'Bicycle', description: 'A bright red bike' },
-          { title: 'Car', description: 'A fast car' },
-        ];
-        const query = '';
-      
-        const results = fullTextSearch(query, data, ['title', 'description']);
-        expect(results).toEqual([]); // Empty query should return no matches
-      });
-  
-    it('should handle case-insensitive matching', () => {
-      const data = [
-        { title: 'BICYCLE', description: 'A bright red bike' },
-        { title: 'bicycle', description: 'A blue bike' },
-      ];
-      const query = 'bicycle';
-  
-      const results = fullTextSearch(query.toLowerCase(), data, ['title']);
-      expect(results).toEqual([
-        { title: 'BICYCLE', description: 'A bright red bike' },
-        { title: 'bicycle', description: 'A blue bike' },
-      ]); // All matching regardless of case
-    });
-  
-    it('should return an empty array if no items match the query', () => {
-      const data = [
-        { title: 'Car', description: 'A fast car' },
-        { title: 'Bus', description: 'A big yellow bus' },
-      ];
-      const query = 'bicycle';
-  
-      const results = fullTextSearch(query, data, ['title', 'description']);
-      expect(results).toEqual([]); // No matching items
-    });
-  
-    it('should handle very large datasets efficiently', () => {
-      const data = Array.from({ length: 10000 }, (_, i) => ({
-        title: `item-${i}`,
-        description: `description-${i}`,
-      }));
-      const query = 'item-9999';
-  
-      const results = fullTextSearch(query, data, ['title']);
-      expect(results).toEqual([{ title: 'item-9999', description: 'description-9999' }]);
-    });
+  it('returns an empty array for a whitespace-only query', () => {
+    const results = fullTextSearch(
+      '     ',
+      products,
+      {
+        fields: ['title'],
+      }
+    );
+
+    expect(results).toEqual([]);
   });
+
+  it('returns an empty array for an empty dataset', () => {
+    const results = fullTextSearch(
+      'bicycle',
+      [],
+      {
+        fields: ['title'] as const,
+      }
+    );
+
+    expect(results).toEqual([]);
+  });
+
+  it('returns an empty array when no fields are provided', () => {
+    const results = fullTextSearch(
+      'bicycle',
+      products,
+      {
+        fields: [],
+      }
+    );
+
+    expect(results).toEqual([]);
+  });
+
+  it('only searches the specified fields', () => {
+    const results = fullTextSearch(
+      'transport',
+      products,
+      {
+        fields: ['title'],
+      }
+    );
+
+    expect(results).toEqual([]);
+  });
+
+  it('preserves the original object references', () => {
+    const results = fullTextSearch(
+      'red bicycle',
+      products,
+      {
+        fields: ['title'],
+      }
+    );
+
+    expect(results[0]).toBe(
+      products[0]
+    );
+  });
+
+  it('does not mutate the input dataset', () => {
+    const original = [
+      ...products,
+    ];
+
+    fullTextSearch(
+      'bicycle',
+      products,
+      {
+        fields: ['title'],
+      }
+    );
+
+    expect(products).toEqual(
+      original
+    );
+  });
+});
