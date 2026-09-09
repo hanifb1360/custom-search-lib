@@ -1,18 +1,25 @@
 {
   "name": "custom-search-lib",
   "version": "1.0.1",
-  "description": "A library for advanced search functionalities including fuzzy, wildcard, prefix, and suffix search.",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "description": "A lightweight TypeScript search toolkit for in memory datasets with no runtime dependencies.",
+  "main": "./dist/index.cjs",
+  "types": "./dist/index.d.ts",
   "files": [
     "dist",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "CHANGELOG.md"
   ],
   "scripts": {
     "test": "jest",
-    "build": "tsc",
-    "lint": "eslint src/**/*.ts"
+    "typecheck": "tsc --noEmit",
+    "clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
+    "build:types": "tsc --emitDeclarationOnly",
+    "build:esm": "esbuild src/index.ts --bundle --format=esm --platform=neutral --target=es2020 --outfile=dist/index.mjs --sourcemap",
+    "build:cjs": "esbuild src/index.ts --bundle --format=cjs --platform=neutral --target=es2020 --outfile=dist/index.cjs --sourcemap",
+    "build": "npm run clean && npm run typecheck && npm run build:types && npm run build:esm && npm run build:cjs",
+    "lint": "eslint src/**/*.ts",
+    "prepack": "npm run build"
   },
   "keywords": [
     "search",
@@ -30,11 +37,28 @@
   "devDependencies": {
     "@eslint/js": "^10.0.0",
     "@types/jest": "^29.5.14",
+    "esbuild": "^0.28.2",
     "eslint": "^10.10.0",
     "fast-check": "^4.9.0",
     "jest": "^29.7.0",
     "ts-jest": "^29.4.12",
     "typescript": "^5.7.2",
     "typescript-eslint": "^8.70.0"
+  },
+  "module": "./dist/index.mjs",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20"
+  },
+  "homepage": "https://github.com/hanifb1360/custom-search-lib#readme",
+  "bugs": {
+    "url": "https://github.com/hanifb1360/custom-search-lib/issues"
   }
 }
