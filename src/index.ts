@@ -11,10 +11,7 @@ export { wildcardSearch } from './search/wildcardSearch';
 
 export { fullTextSearch } from './search/fullTextSearch';
 
-export {
-  applyFilters as filterData,
-} from './data/filter';
-
+export { filterData } from './data/filter';
 export { sortData } from './data/sort';
 
 export {
@@ -31,4 +28,6 @@ export type {
   FullTextSearchOptions,
   SortOrder,
   RangeFilter,
+  FilterCondition,
+  Filters,
 } from './types';

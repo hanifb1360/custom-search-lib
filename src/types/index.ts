@@ -34,3 +34,12 @@ export interface RangeFilter {
   min?: number;
   max?: number;
 }
+
+export type FilterCondition<T> =
+  NonNullable<T> extends number
+    ? T | RangeFilter
+    : T;
+
+export type Filters<T extends object> = {
+  [K in keyof T]?: FilterCondition<T[K]>;
+};
