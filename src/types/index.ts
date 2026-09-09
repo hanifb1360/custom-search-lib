@@ -30,6 +30,17 @@ export interface FullTextSearchOptions<T extends object> {
 
 export type SortOrder = 'asc' | 'desc';
 
+export type SortableValue =
+  | string
+  | number;
+
+export type SortableKey<T extends object> = {
+  [K in keyof T]-?:
+    Exclude<T[K], null | undefined> extends SortableValue
+      ? K
+      : never;
+}[keyof T];
+
 export interface RangeFilter {
   min?: number;
   max?: number;

@@ -27,6 +27,8 @@ export type {
   RankedSearchResult,
   FullTextSearchOptions,
   SortOrder,
+  SortableValue,
+  SortableKey,
   RangeFilter,
   FilterCondition,
   Filters,
