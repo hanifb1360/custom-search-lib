@@ -4,7 +4,7 @@ import {
   prefixSearch,
   suffixSearch,
   wildcardSearch,
-} from '../src/fuzzySearch';
+} from '../../src/search/fuzzySearch';
 
 describe('Fuzzy Search - Core Features', () => {
   it('should return matches within the threshold', () => {

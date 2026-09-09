@@ -1,4 +1,4 @@
-import { fullTextSearch } from '../src/fullTextSearch';
+import { fullTextSearch } from '../../src/search/fullTextSearch';
 
 describe('Full Text Search', () => {
   it('should return items that match the query', () => {
