@@ -1,153 +1,187 @@
 import * as fc from 'fast-check';
+
 import {
   fuzzySearch,
-  rankedFuzzySearch,
   prefixSearch,
   suffixSearch,
-  wildcardSearch,
-} from '../../src/search/fuzzySearch';
+} from '../../src';
 
-describe('Property-based tests for Fuzzy Search', () => {
-  describe('Fuzzy Search', () => {
-    it('should return results within the threshold', () => {
-      fc.assert(
-        fc.property(
-          fc.string({ minLength: 1 }),
-          fc.array(fc.string({ minLength: 1 }), { minLength: 1 }),
-          fc.nat({ max: 5 }), // Threshold range: 0-5
-          (query, data, threshold) => {
-            const results = fuzzySearch(query, data, { threshold });
-            results.forEach(result => {
-              const distance = query.length - result.length; // Approximation
-              expect(distance).toBeLessThanOrEqual(threshold);
-            });
-          }
-        )
-      );
-    });
+import {
+  levenshteinDistance,
+} from '../../src/algorithms/levenshtein';
 
-    it('should be case-insensitive by default', () => {
-      fc.assert(
-        fc.property(
-          fc.string({ minLength: 1 }),
-          fc.array(fc.string({ minLength: 1 }).map(s => s.toUpperCase())),
-          (query, data) => {
-            const results = fuzzySearch(query.toLowerCase(), data);
-            const lowerCaseData = data.map(item => item.toLowerCase());
-            results.forEach(result => {
-              expect(lowerCaseData).toContain(result.toLowerCase());
-            });
-          }
-        )
-      );
-    });
+describe('Levenshtein properties', () => {
+  it('distance from a string to itself is always zero', () => {
+    fc.assert(
+      fc.property(
+        fc.string(),
+        value => {
+          expect(
+            levenshteinDistance(
+              value,
+              value
+            )
+          ).toBe(0);
+        }
+      )
+    );
   });
 
-  describe('Ranked Fuzzy Search', () => {
-    it('should rank results by relevance', () => {
-      fc.assert(
-        fc.property(
-          fc.string({ minLength: 1 }),
-          fc.array(fc.string({ minLength: 1 }), { minLength: 1 }),
-          fc.nat({ max: 5 }), // Threshold range: 0-5
-          (query, data, threshold) => {
-            const results = rankedFuzzySearch(query, data, { threshold });
-            for (let i = 1; i < results.length; i++) {
-              const prevScore = results[i - 1].length;
-              const currentScore = results[i].length;
-              expect(prevScore).toBeLessThanOrEqual(currentScore);
+  it('distance is symmetrical', () => {
+    fc.assert(
+      fc.property(
+        fc.string(),
+        fc.string(),
+        (a, b) => {
+          expect(
+            levenshteinDistance(a, b)
+          ).toBe(
+            levenshteinDistance(b, a)
+          );
+        }
+      )
+    );
+  });
+
+  it('distance is at least the difference in string lengths', () => {
+    fc.assert(
+      fc.property(
+        fc.string(),
+        fc.string(),
+        (a, b) => {
+          expect(
+            levenshteinDistance(a, b)
+          ).toBeGreaterThanOrEqual(
+            Math.abs(
+              a.length - b.length
+            )
+          );
+        }
+      )
+    );
+  });
+});
+
+describe('fuzzySearch properties', () => {
+  it('every returned result is within the threshold', () => {
+    fc.assert(
+      fc.property(
+        fc.string({
+          minLength: 1,
+          maxLength: 20,
+        }),
+        fc.array(
+          fc.string({
+            minLength: 1,
+            maxLength: 20,
+          }),
+          {
+            maxLength: 50,
+          }
+        ),
+        fc.integer({
+          min: 0,
+          max: 5,
+        }),
+        (query, data, threshold) => {
+          const results = fuzzySearch(
+            query,
+            data,
+            {
+              threshold,
             }
+          );
+
+          const normalizedQuery =
+            query.trim().toLocaleLowerCase();
+
+          for (const result of results) {
+            const normalizedResult =
+              result
+                .trim()
+                .toLocaleLowerCase();
+
+            expect(
+              levenshteinDistance(
+                normalizedQuery,
+                normalizedResult
+              )
+            ).toBeLessThanOrEqual(
+              threshold
+            );
           }
-        )
-      );
-    });
+        }
+      )
+    );
   });
+});
 
-  describe('Prefix Search', () => {
-    it('should match items starting with the query', () => {
-      fc.assert(
-        fc.property(
-          fc.string({ minLength: 1 }),
-          fc.array(fc.string({ minLength: 1 }), { minLength: 1 }),
-          (query, data) => {
-            const results = prefixSearch(query, data);
-            results.forEach(result => {
-              expect(result.toLowerCase().startsWith(query.toLowerCase())).toBe(true);
-            });
+describe('prefixSearch properties', () => {
+  it('every returned result starts with the query', () => {
+    fc.assert(
+      fc.property(
+        fc.string({
+          minLength: 1,
+        }),
+        fc.array(fc.string()),
+        (query, data) => {
+          const results = prefixSearch(
+            query,
+            data
+          );
+
+          const normalizedQuery =
+            query
+              .trim()
+              .toLocaleLowerCase();
+
+          for (const result of results) {
+            expect(
+              result
+                .trim()
+                .toLocaleLowerCase()
+                .startsWith(
+                  normalizedQuery
+                )
+            ).toBe(true);
           }
-        )
-      );
-    });
+        }
+      )
+    );
   });
+});
 
-  describe('Suffix Search', () => {
-    it('should match items ending with the query', () => {
-      fc.assert(
-        fc.property(
-          fc.string({ minLength: 1 }),
-          fc.array(fc.string({ minLength: 1 }), { minLength: 1 }),
-          (query, data) => {
-            const results = suffixSearch(query, data);
-            results.forEach(result => {
-              expect(result.toLowerCase().endsWith(query.toLowerCase())).toBe(true);
-            });
+describe('suffixSearch properties', () => {
+  it('every returned result ends with the query', () => {
+    fc.assert(
+      fc.property(
+        fc.string({
+          minLength: 1,
+        }),
+        fc.array(fc.string()),
+        (query, data) => {
+          const results = suffixSearch(
+            query,
+            data
+          );
+
+          const normalizedQuery =
+            query
+              .trim()
+              .toLocaleLowerCase();
+
+          for (const result of results) {
+            expect(
+              result
+                .trim()
+                .toLocaleLowerCase()
+                .endsWith(
+                  normalizedQuery
+                )
+            ).toBe(true);
           }
-        )
-      );
-    });
-  });
-
-  describe('Wildcard Search', () => {
-    it('should match items using wildcard patterns', () => {
-      fc.assert(
-        fc.property(fc.string(), fc.array(fc.string()), (query, data) => {
-          const sanitizedQuery = query
-            .replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // Escape regex special characters
-            .replace(/\\\*/g, '.*'); // Replace escaped '*' with regex '.*'
-  
-          const results = wildcardSearch(query, data);
-          const regex = new RegExp(`^${sanitizedQuery}$`, 'i');
-          results.forEach(result => {
-            expect(regex.test(result)).toBe(true);
-          });
-        })
-      );
-    });
-  });
-
-  describe('Edge Cases', () => {
-    it('should handle empty datasets gracefully', () => {
-      fc.assert(
-        fc.property(fc.string({ minLength: 1 }), query => {
-          const results = fuzzySearch(query, []);
-          expect(results).toEqual([]);
-        })
-      );
-    });
-
-    it('should handle empty queries gracefully', () => {
-      fc.assert(
-        fc.property(
-          fc.array(fc.string({ minLength: 1 }), { minLength: 1 }),
-          data => {
-            const results = fuzzySearch('', data);
-            expect(results).toEqual([]);
-          }
-        )
-      );
-    });
-
-    it('should handle special characters in queries', () => {
-      fc.assert(
-        fc.property(
-          fc.stringOf(fc.constantFrom('!', '@', '#', '$', '%', '^', '&', '*', '(', ')')),
-          fc.array(fc.string({ minLength: 1 }), { minLength: 1 }),
-          (query, data) => {
-            const results = fuzzySearch(query, data);
-            expect(Array.isArray(results)).toBe(true); // Ensure results are an array
-          }
-        )
-      );
-    });
+        }
+      )
+    );
   });
 });

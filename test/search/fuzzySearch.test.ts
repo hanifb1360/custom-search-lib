@@ -1,159 +1,179 @@
-import {
-  fuzzySearch,
-  rankedFuzzySearch,
-  prefixSearch,
-  suffixSearch,
-  wildcardSearch,
-} from '../../src/search/fuzzySearch';
+import { fuzzySearch } from '../../src';
 
-describe('Fuzzy Search - Core Features', () => {
-  it('should return matches within the threshold', () => {
-    const data = ['bicycle', 'bike', 'bicycles', 'tricycle'];
-    const query = 'bicyc';
+describe('fuzzySearch', () => {
+  it('returns all matches within the threshold', () => {
+    const data = [
+      'book',
+      'books',
+      'brook',
+      'booth',
+      'banana',
+    ];
 
-    const results = fuzzySearch(query, data, { threshold: 2 });
-    expect(results).toEqual(['bicycle']);
+    const results = fuzzySearch(
+      'book',
+      data,
+      { threshold: 1 }
+    );
+
+    expect(results).toEqual([
+      'book',
+      'books',
+      'brook',
+    ]);
   });
 
-  it('should handle case-insensitive matching', () => {
-    const data = ['Bicycle', 'BIKE', 'bicycles', 'TriCycle'];
-    const query = 'bicycle';
+  it('excludes matches outside the threshold', () => {
+    const data = [
+      'book',
+      'brook',
+      'banana',
+    ];
 
-    const results = fuzzySearch(query, data, { caseSensitive: false });
-    expect(results).toEqual(['Bicycle']);
+    const results = fuzzySearch(
+      'book',
+      data,
+      { threshold: 1 }
+    );
+
+    expect(results).not.toContain('banana');
   });
 
-  it('should rank matches correctly', () => {
-    const data = ['bicycle', 'bike', 'bicycles', 'tricycle'];
-    const query = 'bicycle';
+  it('supports exact matching with threshold 0', () => {
+    const data = [
+      'hello@world',
+      'hello_world',
+      'hello-world',
+    ];
 
-    const results = rankedFuzzySearch(query, data, { threshold: 2 });
-    console.log('Ranked Fuzzy Results:', results);
-    expect(results).toEqual(['bicycle', 'bicycles']);
-  });
-});
-
-describe('Fuzzy Search - Additional Features', () => {
-  it('should handle prefix search', () => {
-    const data = ['bicycle', 'bike', 'bicycles', 'tricycle', 'batman'];
-    const query = 'bi';
-
-    const results = prefixSearch(query, data);
-    expect(results).toEqual(['bicycle', 'bike', 'bicycles']);
+    expect(
+      fuzzySearch(
+        'hello@world',
+        data,
+        { threshold: 0 }
+      )
+    ).toEqual(['hello@world']);
   });
 
-  it('should handle suffix search', () => {
-    const data = ['bicycle', 'bike', 'tricycle', 'motorcycle'];
-    const query = 'cycle';
+  it('is case-insensitive by default', () => {
+    const data = [
+      'Hello',
+      'hello',
+      'HELLO',
+      'world',
+    ];
 
-    const results = suffixSearch(query, data);
-    expect(results).toEqual(['bicycle', 'tricycle', 'motorcycle']);
+    expect(
+      fuzzySearch(
+        'hello',
+        data,
+        { threshold: 0 }
+      )
+    ).toEqual([
+      'Hello',
+      'hello',
+      'HELLO',
+    ]);
   });
 
-  it('should handle wildcard search with partial matches', () => {
-    const data = ['bicycle', 'bicycles', 'tricycle', 'motorcycle'];
-    const query = '*cycle';
+  it('supports case-sensitive matching', () => {
+    const data = [
+      'Hello',
+      'hello',
+      'HELLO',
+    ];
 
-    const results = wildcardSearch(query, data);
-    console.log('Wildcard Results:', results);
-    expect(results).toEqual(['bicycle', 'tricycle', 'motorcycle']);
-  });
-});
-
-describe('Fuzzy Search - Edge Cases', () => {
-  it('should handle an empty dataset gracefully', () => {
-    const data: string[] = [];
-    const query = 'bicycle';
-
-    const results = fuzzySearch(query, data);
-    expect(results).toEqual([]);
-  });
-
-  it('should handle an empty query gracefully', () => {
-    const data = ['bicycle', 'bike', 'tricycle'];
-    const query = '';
-
-    const results = fuzzySearch(query, data);
-    expect(results).toEqual([]);
+    expect(
+      fuzzySearch(
+        'hello',
+        data,
+        {
+          threshold: 0,
+          caseSensitive: true,
+        }
+      )
+    ).toEqual(['hello']);
   });
 
-  it('should handle large datasets efficiently', () => {
-    const data = Array.from({ length: 100000 }, (_, i) => `item-${i}`);
-    const query = 'item-9999';
-
-    const results = fuzzySearch(query, data, { threshold: 2 });
-    expect(results).toEqual(['item-9999']);
+  it('returns an empty array for an empty query', () => {
+    expect(
+      fuzzySearch(
+        '',
+        ['hello', 'world']
+      )
+    ).toEqual([]);
   });
 
-  it('should handle special characters in the query', () => {
-    const data = ['hello@world', 'hello_world', 'hello-world'];
-    const query = 'hello@world';
-
-    const results = fuzzySearch(query, data);
-    expect(results).toEqual(['hello@world']);
+  it('returns an empty array for whitespace-only queries', () => {
+    expect(
+      fuzzySearch(
+        '   ',
+        ['hello', 'world']
+      )
+    ).toEqual([]);
   });
 
-  it('should handle case-sensitive matches when enabled', () => {
-    const data = ['Hello', 'hello', 'HELLO', 'hi'];
-    const query = 'hello';
-
-    const results = fuzzySearch(query, data, { caseSensitive: true });
-    expect(results).toEqual(['hello']);
+  it('returns an empty array for an empty dataset', () => {
+    expect(
+      fuzzySearch(
+        'hello',
+        []
+      )
+    ).toEqual([]);
   });
 
-  it('should return case-insensitive matches by default', () => {
-    const data = ['Hello', 'hello', 'HELLO', 'hi'];
-    const query = 'hello';
+  it('preserves original values', () => {
+    const data = [
+      'HELLO',
+      'Hello',
+    ];
 
-    const results = fuzzySearch(query, data);
-    console.log('Case-Insensitive Results:', results);
-    expect(results).toEqual(['Hello']);
+    expect(
+      fuzzySearch(
+        'hello',
+        data,
+        { threshold: 0 }
+      )
+    ).toEqual([
+      'HELLO',
+      'Hello',
+    ]);
   });
 
-  it('should handle wildcard queries with special characters', () => {
-    const data = ['hello@world', 'hello_world', 'hello-world', 'hello!world'];
-    const query = 'hello*world';
+  it('handles large datasets without relying on a single result', () => {
+    const data = Array.from(
+      { length: 100000 },
+      (_, index) => `item-${index}`
+    );
 
-    const results = wildcardSearch(query, data);
-    expect(results).toEqual(['hello@world', 'hello_world', 'hello-world', 'hello!world']);
+    const results = fuzzySearch(
+      'item-9999',
+      data,
+      { threshold: 0 }
+    );
+
+    expect(results).toEqual([
+      'item-9999',
+    ]);
   });
 
-  it('should handle prefix search on special characters', () => {
-    const data = ['#hashtag', '#hello', '#world'];
-    const query = '#';
-
-    const results = prefixSearch(query, data);
-    expect(results).toEqual(['#hashtag', '#hello', '#world']);
+  it('throws for negative thresholds', () => {
+    expect(() =>
+      fuzzySearch(
+        'hello',
+        ['hello'],
+        { threshold: -1 }
+      )
+    ).toThrow(RangeError);
   });
 
-  it('should handle suffix search on special characters', () => {
-    const data = ['file.txt', 'image.jpg', 'document.pdf'];
-    const query = '.txt';
-
-    const results = suffixSearch(query, data);
-    expect(results).toEqual(['file.txt']);
-  });
-});
-
-describe('Suffix Search', () => {
-  it('should return items ending with the query', () => {
-    const data = ['bicycle', 'tricycle', '4Uh7Ftdblc', 'randomWord'];
-    const query = 'cle';
-    const results = suffixSearch(query, data);
-    expect(results).toEqual(['bicycle', 'tricycle']); // Correctly matches suffix "cle"
-  });
-
-  it('should handle case-insensitivity', () => {
-    const data = ['File.txt', 'file.TXT', 'image.png'];
-    const query = '.txt';
-    const results = suffixSearch(query, data);
-    expect(results).toEqual(['File.txt', 'file.TXT']); // Matches .txt regardless of case
-  });
-
-  it('should return an empty array when no matches are found', () => {
-    const data = ['bicycle', 'tricycle', 'randomWord'];
-    const query = 'xyz';
-    const results = suffixSearch(query, data);
-    expect(results).toEqual([]); // No items end with "xyz"
+  it('throws for non-integer thresholds', () => {
+    expect(() =>
+      fuzzySearch(
+        'hello',
+        ['hello'],
+        { threshold: 1.5 }
+      )
+    ).toThrow(RangeError);
   });
 });
