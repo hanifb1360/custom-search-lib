@@ -6,6 +6,35 @@ A lightweight, dependency free TypeScript search toolkit for in memory datasets.
 
 It works with TypeScript and JavaScript and ships both ESM and CommonJS builds.
 
+## When to use custom-search-lib
+
+Use `custom-search-lib` when your application already has data in memory and needs lightweight search, filtering, or sorting without setting up a search server or maintaining a search index.
+
+It is a good fit for:
+
+* Admin dashboards
+* Product and customer selectors
+* Autocomplete and search boxes
+* Command palettes
+* Small and medium catalogs
+* Search over data already fetched from an API
+* Local or offline datasets
+* Internal tools
+* TypeScript applications that need search, filtering, and sorting together
+
+For example, if your application already has an array of products, users, documents, or other records and you want typo-tolerant search without introducing a dedicated search service or maintaining a separate index, this package is designed for that use case.
+
+Consider a dedicated or indexed search solution instead when you need:
+
+* Millions of records
+* Persistent full-text indexes
+* Distributed search
+* Semantic or vector search
+* Advanced language-specific stemming or tokenization
+* Search across data that cannot reasonably be kept in memory
+
+`custom-search-lib` intentionally focuses on simple and predictable in-memory operations rather than trying to be a complete search engine.
+
 ## Features
 
 * Fuzzy search using Levenshtein distance
@@ -31,6 +60,65 @@ npm install custom-search-lib
 ```
 
 Node.js 20 or newer is required.
+
+## 30-second example
+
+```ts
+import {
+  rankedFuzzySearch,
+  filterData,
+  sortData,
+} from 'custom-search-lib';
+
+const products = [
+  {
+    name: 'MacBook Pro',
+    category: 'Laptop',
+    price: 2499,
+  },
+  {
+    name: 'Magic Keyboard',
+    category: 'Accessory',
+    price: 199,
+  },
+  {
+    name: 'Mac Studio',
+    category: 'Desktop',
+    price: 1999,
+  },
+];
+
+const names = products.map(
+  product => product.name
+);
+
+const matches = rankedFuzzySearch(
+  'macbok pro',
+  names,
+  {
+    threshold: 1,
+  }
+);
+
+// ['MacBook Pro']
+
+const affordable = filterData(
+  products,
+  {
+    price: {
+      max: 2000,
+    },
+  }
+);
+
+const sorted = sortData(
+  affordable,
+  'price',
+  'asc'
+);
+```
+
+No search index needs to be created. The functions operate directly on the data your application already has in memory.
 
 ## Quick start
 
