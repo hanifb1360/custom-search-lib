@@ -6,10 +6,6 @@ A lightweight, dependency free TypeScript search toolkit for in memory datasets.
 
 It works with TypeScript and JavaScript and ships both ESM and CommonJS builds.
 
-> **v2 development notice**
->
-> The `main` branch currently documents the upcoming v2 release. Until `2.0.0` is published to npm, `npm install custom-search-lib` may still install the previous v1 release.
-
 ## Features
 
 * Fuzzy search using Levenshtein distance

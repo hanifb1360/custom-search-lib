@@ -1,6 +1,6 @@
 {
   "name": "custom-search-lib",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "description": "A lightweight TypeScript search toolkit for in memory datasets with no runtime dependencies.",
   "main": "./dist/index.cjs",
   "types": "./dist/index.d.ts",

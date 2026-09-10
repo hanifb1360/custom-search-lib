@@ -4,9 +4,7 @@ All notable changes to `custom-search-lib` are documented in this file.
 
 The project follows Semantic Versioning.
 
-## Unreleased
-
-This section contains changes planned for the `2.0.0` release.
+## 2.0.0 - 2026-09-10
 
 ### Added
 
