@@ -51,5 +51,8 @@ jobs:
       - name: Test
         run: npm test
 
+      - name: Test packed package
+        run: npm run test:package
+
       - name: Audit production dependencies
         run: npm audit --omit=dev
