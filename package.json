@@ -20,7 +20,8 @@
     "build": "npm run clean && npm run typecheck && npm run build:types && npm run build:esm && npm run build:cjs",
     "lint": "eslint src/**/*.ts",
     "prepack": "npm run build",
-    "test:package": "node scripts/test-package.mjs"
+    "test:package": "node scripts/test-package.mjs",
+    "benchmark": "npm run build && node benchmark/benchmark.mjs"
   },
   "keywords": [
     "search",
