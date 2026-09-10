@@ -4,6 +4,14 @@ All notable changes to `custom-search-lib` are documented in this file.
 
 The project follows Semantic Versioning.
 
+## 2.0.1 - 2026-09-10
+
+### Changed
+
+* Clarified when `custom-search-lib` is a good fit for real-world applications.
+* Added guidance for choosing between in-memory search and dedicated indexed search solutions.
+* Added a concise practical example covering fuzzy search, filtering, and sorting.
+
 ## 2.0.0 - 2026-09-10
 
 ### Added
